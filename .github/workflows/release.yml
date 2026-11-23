@@ -1,6 +1,12 @@
 name: Build and release Poise
 
 on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing version tag to build and release
+        type: string
+        required: true
   pull_request:
   push:
     branches: [main]
@@ -16,11 +22,12 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          ref: ${{ inputs.tag && format('refs/tags/{0}', inputs.tag) || github.ref }}
           persist-credentials: false
       - name: Verify the release tag
-        if: github.ref_type == 'tag'
+        if: github.ref_type == 'tag' || github.event_name == 'workflow_dispatch'
         env:
-          TAG: ${{ github.ref_name }}
+          TAG: ${{ inputs.tag || github.ref_name }}
         run: |
           version=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' Resources/Info.plist)
           if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ || "$TAG" != "v$version" ]]; then
@@ -33,7 +40,7 @@ jobs:
         run: POISE_INSTALL_DIR="$RUNNER_TEMP/Applications" bash scripts/build.sh --install
 
   release:
-    if: github.ref_type == 'tag'
+    if: github.ref_type == 'tag' || github.event_name == 'workflow_dispatch'
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -42,7 +49,7 @@ jobs:
       - name: Publish the source release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
+          TAG: ${{ inputs.tag || github.ref_name }}
         run: |
           if ! gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag \

@@ -10,3 +10,5 @@
    ```
 
 GitHub Actions tests and builds the tagged source before publishing a [GitHub release](https://github.com/alexstrugacz/poise/releases). `bash scripts/update.sh` builds that release locally.
+
+If a tag push doesn't start a build, open the [release workflow](https://github.com/alexstrugacz/poise/actions/workflows/release.yml), select **Run workflow**, and enter the existing tag.
