@@ -1,6 +1,6 @@
 # Poise
 
-Poise is a macOS menu bar app that reminds you to check your posture. By default, it sends a reminder every 30 minutes on weekdays from 9 AM to 5 PM.
+Poise reminds you to check your posture from the macOS menu bar. The default is every 30 minutes on weekdays from 9 AM to 5 PM.
 
 ## Install
 
@@ -9,12 +9,16 @@ Requires macOS 13 or later and Swift 5.9 or later. If you need Apple's Command L
 ```sh
 git clone https://github.com/alexstrugacz/poise.git
 cd poise
-bash scripts/build.sh --install
+bash scripts/update.sh
 open ~/Applications/Poise.app
 ```
 
 ## Use
 
-Click **Poise** in the menu bar, choose **Enable Notifications…**, and allow notifications when macOS asks. Use **Send Test Reminder** to try it.
+Click **Poise** in the menu bar and choose **Enable Notifications…**, then try **Send Test Reminder**. Change the timing under **Remind Every** or **Schedule**.
 
-Use **Remind Every** and **Schedule** to change when reminders show up. You can also pause for 30 minutes or turn on **Launch at Login** from the menu.
+## Update
+
+Quit Poise, then run `bash scripts/update.sh` again from the cloned folder. It builds the latest tagged [GitHub release](https://github.com/alexstrugacz/poise/releases/latest) and installs it over your current copy. Open Poise again when it finishes.
+
+If you cloned Poise before v1.0.2, run `git pull --ff-only` once to get the update script.

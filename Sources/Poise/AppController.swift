@@ -320,6 +320,7 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUs
             errorItem.toolTip = lastErrorDetail
         } else if let lastSuccess { item(lastSuccess, enabled: false) }
         menu.addItem(.separator())
+        item("View Releases…", action: #selector(openReleases))
         let quit = item("Quit Poise", action: #selector(quit))
         quit.keyEquivalent = "q"
         updateStatus()
@@ -432,6 +433,11 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUs
             }
             if !menuIsOpen { rebuildMenu() }
         }
+    }
+
+    @objc private func openReleases() {
+        guard let url = URL(string: "https://github.com/alexstrugacz/poise/releases/latest") else { return }
+        NSWorkspace.shared.open(url)
     }
 
     @objc private func openLoginSettings() { SMAppService.openSystemSettingsLoginItems() }

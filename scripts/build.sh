@@ -4,7 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="${SCRIPT_DIR%/scripts}"
 APP_DIR="${PROJECT_DIR}/dist/Poise.app"
-INSTALL_APP="${HOME}/Applications/Poise.app"
+INSTALL_DIR="${POISE_INSTALL_DIR:-${HOME}/Applications}"
+INSTALL_APP="${INSTALL_DIR}/Poise.app"
 
 if [[ "${1:-}" != "" && "${1:-}" != "--install" ]]; then
     echo "Usage: scripts/build.sh [--install]" >&2
@@ -31,7 +32,7 @@ if [[ "${1:-}" == "--install" ]]; then
             exit 1
         fi
     fi
-    mkdir -p "${HOME}/Applications"
+    mkdir -p "${INSTALL_DIR}"
     ditto "${APP_DIR}" "${INSTALL_APP}"
     echo "Installed: ${INSTALL_APP}"
 fi

@@ -1,0 +1,51 @@
+name: Build and release Poise
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Verify the release tag
+        if: github.ref_type == 'tag'
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' Resources/Info.plist)
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ || "$TAG" != "v$version" ]]; then
+            echo "::error::The tag must match CFBundleShortVersionString."
+            exit 1
+          fi
+      - name: Run Swift tests
+        run: xcrun swift test --disable-sandbox --scratch-path .build --cache-path .build/cache
+      - name: Build and install the app
+        run: POISE_INSTALL_DIR="$RUNNER_TEMP/Applications" bash scripts/build.sh --install
+
+  release:
+    if: github.ref_type == 'tag'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Publish the source release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          if ! gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag \
+              --title "Poise ${TAG#v}" --generate-notes \
+              --notes 'Build and install Poise on your Mac using the [README instructions](https://github.com/alexstrugacz/poise#install).'
+          fi
